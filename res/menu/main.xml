@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.ugopiemontese.photoredlecce.MainActivity" >
+
+    <item
+        android:id="@+id/action_about"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:title="@string/action_about"
+        android:icon="@drawable/ic_menu_help_holo_light" />
+
+</menu>

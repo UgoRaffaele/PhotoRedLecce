@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PhotoRed Lecce</string>
+    
+    <string name="action_about">Credits</string>
+    
+    <string name="textAsk">Desideri attivare la localizzazione in tempo reale dei photored?</string>
+    
+    <string name="credits_developed_by">Developed by\nUgo Raffaele Piemontese</string>
+    <string name="developed_by_link">http://www.ugopiemontese.eu</string>
+    <string name="credits_data_provided_by">Dataset provided by\nComune di Lecce</string>
+    <string name="credits_data_link">http://dati.comune.lecce.it</string>
+
+</resources>

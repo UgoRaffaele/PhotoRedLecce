@@ -1,0 +1,44 @@
+[
+	{
+		"Luogo": "Viale Giovanni Paolo",
+		"coordinates": [
+	        18.18825,
+	        40.36135
+	    ]
+	},
+	{
+		"Luogo": "Viale Giovanni Paolo",
+		"coordinates": [
+            18.18815,
+            40.36158
+        ]
+	},
+	{
+		"Luogo": "Viale Rossini",
+		"coordinates": [
+            18.18475,
+            40.34744
+        ]
+	},
+	{
+		"Luogo": "Viale Rossini",
+		"coordinates": [
+            18.18456,
+            40.34793
+        ]
+	},
+	{
+		"Luogo": "Via Gianmatteo",
+		"coordinates": [
+            18.17643,
+            40.36259
+        ]
+	},
+	{
+		"Luogo": "Via Gianmatteo",
+		"coordinates": [
+            18.17532,
+            40.36278
+        ]
+	}
+]
