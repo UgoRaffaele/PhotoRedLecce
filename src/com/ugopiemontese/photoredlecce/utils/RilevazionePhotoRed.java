@@ -24,9 +24,8 @@ public class RilevazionePhotoRed extends Service implements android.location.Loc
 	private int NOTIFICATION = 10101;
 	
 	private LocationManager locationManager;
-	private static final long MIN_TIME = 30000;
-	private static final long MIN_DISTANCE = 500;
-	private static final float MAX_DISTANCE = 5000;
+	private static final long MIN_TIME = 30 * 1000;
+	private static final float MIN_DISTANCE = 500;
 	
 	private TextToSpeech mTTS;
 	
@@ -115,7 +114,7 @@ public class RilevazionePhotoRed extends Service implements android.location.Loc
 					distance
 	    		);
 
-	        	if ( distance[0] <= MAX_DISTANCE ) {
+	        	if ( distance[0] <= MIN_DISTANCE ) {
 	        		
 	        		final String indirizzo = photoRedList.get(count).getAddress();
 	        		mTTS = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
@@ -143,6 +142,8 @@ public class RilevazionePhotoRed extends Service implements android.location.Loc
     		}
     		
     	}
+    	
+    	announced = false;
     	
 	}
 
