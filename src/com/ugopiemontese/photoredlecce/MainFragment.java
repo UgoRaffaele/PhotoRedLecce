@@ -21,13 +21,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import com.ugopiemontese.photoredlecce.utils.PhotoRed;
+import com.ugopiemontese.photoredlecce.utils.PhotoRedSQLiteHelper;
+import com.ugopiemontese.photoredlecce.utils.RilevazionePhotoRed;
+
 import android.app.Fragment;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ToggleButton;
 
 public class MainFragment extends Fragment implements OnCameraChangeListener {
 
@@ -46,6 +56,11 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 	
 	private AsyncTask<Void, Void, Boolean> TaskAsincrono = null;
 	
+	private Intent serviceIntent;
+	private SharedPreferences prefs;
+	private final String PREF_NOTIFICA = "notifica";
+	private final String PREF_PRIMO_AVVIO = "primo_avvio";
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		
@@ -53,13 +68,65 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 		
 		int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getActivity());
 		if ( status == ConnectionResult.SUCCESS ) {
+			
 			InitMap();
 			TaskAsincrono = new CaricamentoAsincrono().execute();
+			
 		} else {
+			
  			GooglePlayServicesUtil.getErrorDialog(status, getActivity(), CONNECTION_FAILURE_RESOLUTION_REQUEST).show();
+ 			
  		}
 		
+		prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		ToggleButton toggleButton = (ToggleButton) rootView.findViewById(R.id.toggleButton);
+		toggleButton.setChecked(prefs.getBoolean(PREF_NOTIFICA, false));
+		
+		serviceIntent = new Intent(getActivity(), RilevazionePhotoRed.class);
+		
+		if (prefs.getBoolean(PREF_NOTIFICA, false)) {
+			
+			getActivity().startService(serviceIntent);
+			
+		}
+		
+		toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener () {
+
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				
+				SharedPreferences.Editor editor = prefs.edit();
+				editor.putBoolean(PREF_NOTIFICA, arg1);
+				editor.commit();
+								
+				if (arg1) {
+					
+					getActivity().startService(serviceIntent);
+					
+				} else {
+					
+					getActivity().stopService(serviceIntent);
+					
+				}
+				
+			}
+			
+		});
+		
 		return rootView;
+		
+	}
+	
+	@Override
+	public void onDestroyView() {
+		
+		super.onDestroyView();
+		  
+		if(TaskAsincrono != null && TaskAsincrono.getStatus() != AsyncTask.Status.FINISHED) {
+			
+			TaskAsincrono.cancel(true);
+			
+		}
 		
 	}
 	
@@ -75,7 +142,9 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 	    LatLng lecce = new LatLng(Double.valueOf(lecce_lat), Double.valueOf(lecce_lng));
 	    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(lecce, 12);
 		if ( map != null ) {
+			
 		    map.animateCamera(cameraUpdate);
+		    
 		}
 		
 		map.setOnCameraChangeListener(this);
@@ -93,10 +162,14 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 		Location.distanceBetween(lecce_lat, lecce_lng, position.target.latitude, position.target.longitude, distance);
 		
 		if(distance[0] >= max_distance) {
+			
 		    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(lecce, 12);
 			if ( map != null ) {
+				
 			    map.animateCamera(cameraUpdate);
+			    
 			}
+			
 		}
 		
 	}
@@ -105,15 +178,19 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 		
 	    String json = null;
 	    try {
+	    	
 	        InputStream is = getActivity().getAssets().open("photored.json");
 	        int size = is.available();
 	        byte[] buffer = new byte[size];
 	        is.read(buffer);
 	        is.close();
 	        json = new String(buffer, "UTF-8");
+	        
 	    } catch (IOException ex) {
+	    	
 	        ex.printStackTrace();
 	        return null;
+	        
 	    }
 	    
 	    return json;
@@ -123,24 +200,28 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 	public class CaricamentoAsincrono extends AsyncTask<Void, Void, Boolean> {
 		
 		ArrayList<Object[]> photoredList = new ArrayList<Object[]>();
+		PhotoRedSQLiteHelper db = new PhotoRedSQLiteHelper(getActivity());
 		
 		@Override
 		protected void onPreExecute() {
+			
 			if ( map != null ) {
+				
 				map.clear();
+				
 			}
+			
 		}
 		
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			
-			JSONArray photoreds = null;
-			
+						
 			try {
 				
-				photoreds = new JSONArray(loadJSONFromAsset());
+				JSONArray photoreds = new JSONArray(loadJSONFromAsset());
 				
 				for (int i = 0; i < photoreds.length(); i++) {
+					
 					JSONObject red = photoreds.getJSONObject(i);
 		
 					String address = red.getString(TAG_LUOGO); 
@@ -149,11 +230,23 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 					
 					Object[] photored = new Object[] { address, point };
 					photoredList.add(photored);
+					
+					if ( prefs.getBoolean(PREF_PRIMO_AVVIO, true) ) {
+						
+						db.addPhotoRed(new PhotoRed(
+		                		(String) address, 
+		                		(Double) point.latitude, 
+		                		(Double) point.longitude
+		                ));
+						
+					}
+					
 				}
 				
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
+				
 			}
 			
 			return true;
@@ -164,10 +257,21 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 		protected void onPostExecute(final Boolean success) {
 			
 			if ( isCancelled() ) {
+				
 				return;
+				
+			}
+			
+			if ( prefs.getBoolean(PREF_PRIMO_AVVIO, true) ) {
+				
+				SharedPreferences.Editor editor = prefs.edit();
+				editor.putBoolean(PREF_PRIMO_AVVIO, false);
+				editor.commit();
+				
 			}
 			
 			for (int count = 0; count < photoredList.size(); count++) {	
+				
 				@SuppressWarnings("unused")
 				Marker mrk = map.addMarker(new MarkerOptions()
 					.title((String) photoredList.get(count)[0])
@@ -175,6 +279,7 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 		    		.icon(BitmapDescriptorFactory.fromResource(R.drawable.photored))
 		    		.anchor(0.5f, 0.5f)
 		    	);
+				
 			}
 			
 		}

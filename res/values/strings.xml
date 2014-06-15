@@ -11,5 +11,8 @@
     <string name="developed_by_link">http://www.ugopiemontese.eu</string>
     <string name="credits_data_provided_by">Dataset provided by\nComune di Lecce</string>
     <string name="credits_data_link">http://dati.comune.lecce.it</string>
+    
+    <string name="rilevazione_service_photored">Attenzione, sei in prossimità del photo red di </string>
+    <string name="rilevazione_notification_photored">Attenzione, sei in prossimità di un PhotoRed!</string>
 
 </resources>
