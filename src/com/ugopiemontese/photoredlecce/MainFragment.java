@@ -25,10 +25,14 @@ import com.ugopiemontese.photoredlecce.utils.PhotoRed;
 import com.ugopiemontese.photoredlecce.utils.PhotoRedSQLiteHelper;
 import com.ugopiemontese.photoredlecce.utils.RilevazionePhotoRed;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -98,14 +102,53 @@ public class MainFragment extends Fragment implements OnCameraChangeListener {
 				SharedPreferences.Editor editor = prefs.edit();
 				editor.putBoolean(PREF_NOTIFICA, arg1);
 				editor.commit();
-								
-				if (arg1) {
+				
+				LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+				boolean loc_check = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+				
+				if (arg1 && loc_check) {
 					
 					getActivity().startService(serviceIntent);
 					
 				} else {
+										
+					if ( !loc_check ) {
+						
+						AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+				        alertDialogBuilder.setMessage(R.string.status_inactive_gps).setCancelable(false);
+				        
+				        alertDialogBuilder.setPositiveButton(R.string.action_attiva_gps, new DialogInterface.OnClickListener() {
+				        	
+				        	public void onClick(DialogInterface dialog, int id) {
+				        		
+				                Intent callGPSSettingIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+				                startActivity(callGPSSettingIntent);
+				                
+				            }
+				        	
+				        });
+				        
+				        alertDialogBuilder.setNegativeButton(R.string.action_annulla_gps, new DialogInterface.OnClickListener() {
+				        	
+				        	public void onClick(DialogInterface dialog, int id) {
+				        		
+				        		dialog.cancel();
+				        		
+				        	}
+				        	
+				        });
+
+				        AlertDialog alert = alertDialogBuilder.create();
+				        alert.show();
+						
+					}
 					
 					getActivity().stopService(serviceIntent);
+					
+					arg0.setChecked(false);
+					
+					editor.putBoolean(PREF_NOTIFICA, false);
+					editor.commit();
 					
 				}
 				
