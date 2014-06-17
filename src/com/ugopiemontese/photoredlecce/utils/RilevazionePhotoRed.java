@@ -25,7 +25,7 @@ public class RilevazionePhotoRed extends Service implements android.location.Loc
 	
 	private LocationManager locationManager;
 	private static final long MIN_TIME = 30 * 1000;
-	private static final float MIN_DISTANCE = 500;
+	private static final float MIN_DISTANCE = 150;
 	
 	private TextToSpeech mTTS;
 	
